@@ -1,0 +1,121 @@
+import { NextResponse } from "next/server";
+import { z } from "zod";
+
+import { syncAuthUser } from "@/lib/auth-user";
+import { hasPublicSupabaseEnv } from "@/lib/env";
+import { prisma } from "@/lib/prisma";
+import { mapShootToRecord } from "@/lib/shoots";
+import { createClient } from "@/lib/supabase/server";
+
+const updateShootSchema = z.object({
+  status: z.enum(["PROCESSING", "READY", "FAILED"]).optional(),
+  type: z.enum(["DRONE", "TOUR_3D", "COMBO"]).optional(),
+  voiceoverText: z.string().optional(),
+  audioUrl: z.string().url().optional(),
+  videoUrl: z.string().url().optional(),
+  logoUrl: z.string().optional(),
+  phoneNumber: z.string().optional(),
+  brandColor: z.string().optional(),
+  nearbyLabels: z.any().optional(),
+  landAnalysis: z.any().optional(),
+  completedAt: z.string().datetime().optional()
+});
+
+async function getAuthenticatedUser() {
+  if (!hasPublicSupabaseEnv()) {
+    return null;
+  }
+
+  const supabase = createClient();
+  const {
+    data: { user }
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return null;
+  }
+
+  await syncAuthUser(user);
+  return user;
+}
+
+export async function GET(_request: Request, { params }: { params: { id: string } }) {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const shoot = await prisma.shoot.findFirst({
+    where: {
+      id: params.id,
+      userId: user.id
+    }
+  });
+
+  if (!shoot) {
+    return NextResponse.json({ error: "Çekim bulunamadı." }, { status: 404 });
+  }
+
+  return NextResponse.json({ item: mapShootToRecord(shoot) });
+}
+
+export async function PATCH(request: Request, { params }: { params: { id: string } }) {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const payload = updateShootSchema.parse(await request.json());
+  const result = await prisma.shoot.updateMany({
+    where: {
+      id: params.id,
+      userId: user.id
+    },
+    data: {
+      status: payload.status,
+      type: payload.type,
+      voiceoverText: payload.voiceoverText,
+      audioUrl: payload.audioUrl,
+      videoUrl: payload.videoUrl,
+      logoUrl: payload.logoUrl,
+      phoneNumber: payload.phoneNumber,
+      brandColor: payload.brandColor,
+      nearbyLabels: payload.nearbyLabels,
+      landAnalysis: payload.landAnalysis,
+      completedAt: payload.completedAt ? new Date(payload.completedAt) : undefined
+    }
+  });
+
+  if (!result.count) {
+    return NextResponse.json({ error: "Çekim bulunamadı." }, { status: 404 });
+  }
+
+  const updated = await prisma.shoot.findUnique({
+    where: { id: params.id }
+  });
+
+  return NextResponse.json({ item: updated ? mapShootToRecord(updated) : null });
+}
+
+export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
+  const user = await getAuthenticatedUser();
+
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const deleted = await prisma.shoot.deleteMany({
+    where: {
+      id: params.id,
+      userId: user.id
+    }
+  });
+
+  if (!deleted.count) {
+    return NextResponse.json({ error: "Çekim bulunamadı." }, { status: 404 });
+  }
+
+  return NextResponse.json({ success: true });
+}

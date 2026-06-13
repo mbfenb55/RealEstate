@@ -1,0 +1,60 @@
+{
+  "name": "ai-emlak-drone-saas",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts",
+    "prisma:generate": "prisma generate",
+    "prisma:migrate": "prisma migrate dev",
+    "prisma:studio": "prisma studio"
+  },
+  "prisma": {
+    "seed": "ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+  },
+  "dependencies": {
+    "@hookform/resolvers": "^3.9.0",
+    "@prisma/client": "^5.18.0",
+    "@radix-ui/react-accordion": "^1.2.13",
+    "@react-email/components": "^0.5.7",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.45.3",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
+    "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^11.3.30",
+    "lottie-react": "^2.4.1",
+    "lucide-react": "^0.441.0",
+    "mapbox-gl": "^3.7.0",
+    "next": "^14.2.14",
+    "next-themes": "^0.3.0",
+    "openai": "^4.62.1",
+    "react": "^18.3.1",
+    "react-colorful": "^5.7.0",
+    "react-dom": "^18.3.1",
+    "react-dropzone": "^15.0.0",
+    "react-hook-form": "^7.53.0",
+    "react-hot-toast": "^2.6.0",
+    "resend": "^4.0.0",
+    "tailwind-merge": "^2.5.2",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.23.8",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "autoprefixer": "^10.4.20",
+    "eslint": "^8.57.0",
+    "eslint-config-next": "^14.2.14",
+    "postcss": "^8.4.47",
+    "prisma": "^5.18.0",
+    "tailwindcss": "^3.4.13",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.2"
+  }
+}
