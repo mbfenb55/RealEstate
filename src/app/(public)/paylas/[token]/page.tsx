@@ -26,7 +26,7 @@ export default async function PublicSharePage({ params }: { params: { token: str
     <main className="min-h-screen bg-slate-950 px-4 py-10 text-white">
       <div className="mx-auto max-w-6xl space-y-8">
         <div className="space-y-3">
-          <p className="text-sm font-medium uppercase tracking-[0.24em] text-secondary">Drone360 Paylaşım</p>
+          <p className="text-sm font-medium uppercase tracking-[0.24em] text-secondary">Parselim Paylaşım</p>
           <h1 className="text-4xl font-semibold">{`Ada ${shoot.adaNo} / Parsel ${shoot.parselNo}`}</h1>
           <p className="text-slate-300">
             {shoot.ilce}, {shoot.il} • {formatDate(shoot.createdAt.toISOString())}

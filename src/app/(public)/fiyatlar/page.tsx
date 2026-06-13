@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "Fiyatlar | Terramony",
+  title: "Fiyatlar | Parselim",
   description: "399 TL'den başlayan fiyatlarla sanal drone çekimi ve 3D sanal tur. İlk çekim ücretsiz.",
-  alternates: { canonical: "https://terramony.com/fiyatlar" }
+  alternates: { canonical: "https://parselim.com/fiyatlar" }
 };
 
 import { CTABanner } from "@/components/landing/CTABanner";

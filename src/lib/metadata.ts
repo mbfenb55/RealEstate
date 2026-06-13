@@ -31,12 +31,12 @@ export function buildLocalBusinessSchema() {
   return {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
-    name: "Drone360 Türkiye",
+    name: "Parselim",
     description:
       "Türkiye emlak pazarı için yapay zeka destekli sanal drone turu, 3D sanal tur ve arsa analiz platformu.",
     url: getAppUrl(),
     telephone: "+90 850 000 36 36",
-    email: "hello@drone360turkiye.com",
+    email: "destek@parselim.com",
     address: {
       "@type": "PostalAddress",
       addressCountry: "TR",

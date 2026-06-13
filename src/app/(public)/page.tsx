@@ -1,18 +1,18 @@
 export const metadata = {
-  title: "Terramony | AI Destekli Sanal Drone Çekimi & 3D Sanal Tur",
+  title: "Parselim | AI Destekli Sanal Drone Çekimi & 3D Sanal Tur",
   description:
     "Ada-parsel numaranızı girin, 10 dakikada profesyonel drone videosu ve 3D sanal tur hazırlayın. Türkiye'nin #1 AI emlak görselleştirme platformu.",
   keywords: "sanal drone çekimi, 3D sanal tur, emlak videosu, arsa analizi, yapay zeka emlak",
   openGraph: {
-    title: "Terramony | AI Destekli Sanal Drone Çekimi",
+    title: "Parselim | AI Destekli Sanal Drone Çekimi",
     description: "10 dakikada profesyonel emlak videosu. Ada-parsel ile anında oluştur.",
-    url: "https://terramony.com",
-    siteName: "Terramony",
+    url: "https://parselim.com",
+    siteName: "Parselim",
     locale: "tr_TR",
     type: "website"
   },
-  twitter: { card: "summary_large_image", title: "Terramony", description: "AI destekli sanal drone çekimi" },
-  alternates: { canonical: "https://terramony.com" }
+  twitter: { card: "summary_large_image", title: "Parselim", description: "AI destekli sanal drone çekimi" },
+  alternates: { canonical: "https://parselim.com" }
 };
 
 import { CTABanner } from "@/components/landing/CTABanner";
@@ -43,9 +43,9 @@ export default function LandingPage() {
           __html: JSON.stringify({
             "@context": "https://schema.org",
             "@type": "LocalBusiness",
-            name: "Terramony",
+            name: "Parselim",
             description: "AI destekli sanal drone çekimi ve 3D sanal tur platformu",
-            url: "https://terramony.com",
+            url: "https://parselim.com",
             telephone: "+90-212-000-0000",
             address: {
               "@type": "PostalAddress",

@@ -148,7 +148,7 @@ export const blogPosts: BlogPost[] = [
     category: "Pazarlama",
     publishedAt: "2026-05-04",
     readingTime: "6 dk",
-    author: "Drone360 Editör",
+    author: "Parselim Editör",
     content: [
       "Drone görüntüleri alan algısını daha hızlı kurar.",
       "Arsa ve villa portföylerinde çevre bağlantısı dönüşümü yükseltir.",

@@ -6,14 +6,14 @@ async function main() {
   console.log("Seed işlemi başlıyor...");
 
   const demoUser = await prisma.user.upsert({
-    where: { email: "demo@terramony.com" },
+    where: { email: "demo@parselim.com" },
     update: {
       fullName: "Demo Kullanıcı",
       companyName: "Re/Max İstanbul",
       credits: 5
     },
     create: {
-      email: "demo@terramony.com",
+      email: "demo@parselim.com",
       fullName: "Demo Kullanıcı",
       companyName: "Re/Max İstanbul",
       credits: 5
@@ -21,14 +21,14 @@ async function main() {
   });
 
   const testUser = await prisma.user.upsert({
-    where: { email: "test@terramony.com" },
+    where: { email: "test@parselim.com" },
     update: {
       fullName: "Test Danışman",
       companyName: "Century 21",
       credits: 2
     },
     create: {
-      email: "test@terramony.com",
+      email: "test@parselim.com",
       fullName: "Test Danışman",
       companyName: "Century 21",
       credits: 2

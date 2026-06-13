@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "Hakkımızda | Terramony",
-  description: "Terramony, Türkiye'nin yapay zeka destekli emlak görselleştirme platformudur.",
-  alternates: { canonical: "https://terramony.com/hakkimizda" }
+  title: "Hakkımızda | Parselim",
+  description: "Parselim, Türkiye'nin yapay zeka destekli emlak görselleştirme platformudur.",
+  alternates: { canonical: "https://parselim.com/hakkimizda" }
 };
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -13,7 +13,7 @@ export default function AboutPage() {
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Hakkımızda</p>
         <h1 className="section-heading">Drone üretimini daha ölçülebilir ve daha hızlı hale getiriyoruz</h1>
         <p className="section-copy">
-          Drone360 Türkiye, emlak danışmanları, proje geliştiriciler ve arsa yatırım ekipleri için yapay zeka destekli
+          Parselim, emlak danışmanları, proje geliştiriciler ve arsa yatırım ekipleri için yapay zeka destekli
           içerik üretimi altyapısı sunar.
         </p>
       </div>

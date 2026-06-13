@@ -14,15 +14,15 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
 
   if (!service) {
     return {
-      title: "Hizmetler | Terramony",
-      description: "Terramony hizmet detayları"
+      title: "Hizmetler | Parselim",
+      description: "Parselim hizmet detayları"
     };
   }
 
   return {
-    title: `${service.title} | Terramony`,
+    title: `${service.title} | Parselim`,
     description: service.excerpt,
-    alternates: { canonical: `https://terramony.com/hizmetler/${service.slug}` }
+    alternates: { canonical: `https://parselim.com/hizmetler/${service.slug}` }
   };
 }
 

@@ -14,14 +14,14 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   ...buildPageMetadata(
-    "Drone360 Türkiye | Yapay Zeka Destekli Emlak Drone Turları",
-    "Türkiye emlak pazarı için yapay zeka destekli sanal drone turu, arsa analizi, seslendirme ve satış hızlandırma platformu."
+    "Parselim | AI Destekli Sanal Drone Çekimi ve Arsa Analizi",
+    "Ada-parsel verileriyle profesyonel sanal drone çekimi, 3D tur ve arsa analizi oluşturun."
   ),
   title: {
-    default: "Drone360 Türkiye | Yapay Zeka Destekli Emlak Drone Turları",
-    template: "%s | Drone360 Türkiye"
+    default: "Parselim | AI Destekli Sanal Drone Çekimi ve Arsa Analizi",
+    template: "%s | Parselim"
   },
-  keywords: ["drone çekimi", "arsa analizi", "emlak SaaS", "Türkiye emlak yazılımı", "sanal drone turu"]
+  keywords: ["arsa analizi", "sanal drone çekimi", "3D sanal tur", "emlak SaaS", "Türkiye emlak yazılımı"]
 };
 
 export default function RootLayout({

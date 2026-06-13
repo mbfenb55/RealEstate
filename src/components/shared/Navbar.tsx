@@ -49,11 +49,11 @@ export function Navbar() {
         <div className="container flex h-20 items-center justify-between gap-4">
           <Link href="/#hero" className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-white shadow-lg shadow-primary/25">
-              D
+              P
             </div>
             <div>
-              <p className="text-base font-semibold text-slate-900">Drone360 Türkiye</p>
-              <p className="text-xs text-slate-500">AI Emlak Medya Platformu</p>
+              <p className="text-base font-semibold text-slate-900">Parselim</p>
+              <p className="text-xs text-slate-500">AI Destekli Arsa Platformu</p>
             </div>
           </Link>
 

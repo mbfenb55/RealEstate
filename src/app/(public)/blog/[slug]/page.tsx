@@ -11,15 +11,15 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
 
   if (!post) {
     return {
-      title: "Blog | Terramony",
-      description: "Terramony blog yazıları"
+      title: "Blog | Parselim",
+      description: "Parselim blog yazıları"
     };
   }
 
   return {
-    title: `${post.title} | Terramony`,
+    title: `${post.title} | Parselim`,
     description: post.excerpt,
-    alternates: { canonical: `https://terramony.com/blog/${post.slug}` }
+    alternates: { canonical: `https://parselim.com/blog/${post.slug}` }
   };
 }
 

@@ -62,8 +62,8 @@ export async function POST(request: Request) {
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
     "85.34.78.112";
-  const fullName = String(user.user_metadata?.full_name ?? "Drone360 Kullanıcı");
-  const [name = "Drone360", ...surnameParts] = fullName.split(" ");
+  const fullName = String(user.user_metadata?.full_name ?? "Parselim Kullanıcı");
+  const [name = "Parselim", ...surnameParts] = fullName.split(" ");
   const surname = surnameParts.join(" ") || "Kullanıcı";
 
   const checkout = await initializeCheckoutForm({

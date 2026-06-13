@@ -21,7 +21,7 @@ const schema = z.object({
 });
 
 type FormValues = z.infer<typeof schema>;
-const REMEMBER_EMAIL_KEY = "drone360-remembered-email";
+const REMEMBER_EMAIL_KEY = "parselim-remembered-email";
 
 function GoogleIcon() {
   return (

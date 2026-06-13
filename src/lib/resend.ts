@@ -26,10 +26,10 @@ export async function sendWelcomeEmail(
   return resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: email,
-    subject: "Drone360 Türkiye hesabınız hazır",
+    subject: "Parselim hesabınız hazır",
     html: `<div style="font-family: Arial, sans-serif; line-height:1.6">
       <h2>${greeting}, hoş geldiniz</h2>
-      <p>Drone360 Türkiye hesabınız oluşturuldu.</p>
+      <p>Parselim hesabınız oluşturuldu.</p>
       <p>Başlangıç hediyesi olarak hesabınıza <strong>${payload.credits} ücretsiz kredi</strong> tanımlandı.</p>
       <p>Panelinize giriş yaparak ilk sanal çekiminizi hemen başlatabilirsiniz.</p>
     </div>`
@@ -46,7 +46,7 @@ export async function sendPaymentSuccessEmail(email: string, payload: { planName
   return resend.emails.send({
     from: process.env.RESEND_FROM_EMAIL!,
     to: email,
-    subject: "Drone360 kredi paketi satın alımınız tamamlandı",
+    subject: "Parselim kredi paketi satın alımınız tamamlandı",
     html: `<div style="font-family: Arial, sans-serif; line-height:1.6">
       <h2>Ödemeniz alındı</h2>
       <p><strong>${payload.planName}</strong> paketi hesabınıza tanımlandı.</p>

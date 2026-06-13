@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "İletişim | Terramony",
-  description: "Terramony ile iletişime geçin. Sorularınız için destek@terramony.com",
-  alternates: { canonical: "https://terramony.com/iletisim" }
+  title: "İletişim | Parselim",
+  description: "Parselim ile iletişime geçin. Sorularınız için destek@parselim.com",
+  alternates: { canonical: "https://parselim.com/iletisim" }
 };
 
 import ContactForm from "./ContactForm";
@@ -17,7 +17,7 @@ export default function ContactPage() {
             Hacminiz, ekip yapınız ve hedefiniz ne olursa olsun Türkiye odaklı kurulum planı hazırlayalım.
           </p>
           <div className="rounded-[2rem] border bg-card p-6 text-sm text-muted-foreground">
-            <p>hello@drone360turkiye.com</p>
+            <p>destek@parselim.com</p>
             <p className="mt-2">+90 850 000 36 36</p>
             <p className="mt-2">Maslak, İstanbul</p>
           </div>

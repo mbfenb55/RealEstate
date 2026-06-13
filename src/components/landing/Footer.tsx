@@ -36,11 +36,11 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-3">
               <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-primary text-sm font-semibold text-white">
-                D
+                P
               </div>
               <div>
-                <p className="text-lg font-semibold text-white">Drone360 Türkiye</p>
-                <p className="text-sm text-slate-400">AI destekli emlak medya platformu</p>
+                <p className="text-lg font-semibold text-white">Parselim</p>
+                <p className="text-sm text-slate-400">AI Destekli Arsa Platformu</p>
               </div>
             </div>
             <p className="mt-5 max-w-md text-sm leading-7 text-slate-400">
@@ -78,7 +78,7 @@ export function Footer() {
         </div>
 
         <div className="mt-12 border-t border-white/10 pt-6 text-sm text-slate-400">
-          © 2026 Drone360 Türkiye. Tüm hakları saklıdır.
+          © 2026 Parselim. Tüm hakları saklıdır.
         </div>
       </div>
     </footer>

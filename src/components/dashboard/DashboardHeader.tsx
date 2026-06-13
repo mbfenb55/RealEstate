@@ -32,7 +32,7 @@ export function DashboardHeader({
         <div>
           <p className="text-sm text-slate-500">Hoş geldiniz</p>
           <h2 className="text-lg font-semibold text-slate-900">
-            {profile?.fullName || profile?.companyName || "Drone360 Panel"}
+            {profile?.fullName || profile?.companyName || "Parselim Panel"}
           </h2>
         </div>
       </div>

@@ -140,7 +140,7 @@ async function handleCallback(request: Request) {
     }
 
     await sendPaymentSuccessEmail(payment.user.email, {
-      planName: "Drone360 kredi paketi",
+      planName: "Parselim kredi paketi",
       amount: Number(result.paidPrice ?? payment.amount)
     });
   }

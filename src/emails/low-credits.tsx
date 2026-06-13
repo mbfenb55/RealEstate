@@ -39,8 +39,8 @@ export default function LowCreditsEmail({ fullName, remainingCredits }: LowCredi
           }}
         >
           <Img
-            src="https://via.placeholder.com/150x50?text=TERRAMONY"
-            alt="Terramony"
+            src="https://via.placeholder.com/150x50?text=PARSELİM"
+            alt="Parselim"
             width="150"
             height="50"
             style={{ display: "block", marginBottom: "24px" }}
@@ -94,7 +94,7 @@ export default function LowCreditsEmail({ fullName, remainingCredits }: LowCredi
           <Hr style={{ borderColor: "#e2e8f0", margin: "32px 0 20px" }} />
 
           <Text style={{ margin: 0, color: "#94a3b8", fontSize: "12px", lineHeight: "20px" }}>
-            © 2024 Terramony. Tüm hakları saklıdır.
+            © 2024 Parselim. Tüm hakları saklıdır.
           </Text>
         </Container>
       </Body>

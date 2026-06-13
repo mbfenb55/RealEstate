@@ -1,7 +1,7 @@
 export const metadata = {
-  title: "Blog | Terramony",
+  title: "Blog | Parselim",
   description: "Emlak sektöründe yapay zeka, sanal tur ve dijital pazarlama hakkında güncel yazılar.",
-  alternates: { canonical: "https://terramony.com/blog" }
+  alternates: { canonical: "https://parselim.com/blog" }
 };
 
 import Link from "next/link";
