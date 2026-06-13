@@ -1,7 +1,16 @@
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { createMockCompletedPayload } from "@/lib/shoots";
 
 const pendingTimers = new Map<string, ReturnType<typeof setTimeout>>();
+
+function resolvePrisma(): ReturnType<typeof getPrisma> | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Mock shoot Prisma client initialization failed:", error);
+    return null;
+  }
+}
 
 export function scheduleMockShootProcessing(shootId: string) {
   if (pendingTimers.has(shootId)) {
@@ -10,6 +19,12 @@ export function scheduleMockShootProcessing(shootId: string) {
 
   const timer = setTimeout(async () => {
     pendingTimers.delete(shootId);
+
+    const prisma = resolvePrisma();
+
+    if (!prisma) {
+      return;
+    }
 
     try {
       const shoot = await prisma.shoot.findUnique({

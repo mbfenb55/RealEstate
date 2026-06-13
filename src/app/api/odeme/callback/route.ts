@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 
 import { retrieveCheckoutForm } from "@/lib/iyzico";
 import { scheduleMockShootProcessing } from "@/lib/mock-processing";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { sendPaymentSuccessEmail } from "@/lib/resend";
 
 async function resolvePayload(request: Request) {
@@ -31,11 +31,26 @@ async function resolvePayload(request: Request) {
   };
 }
 
+function resolvePrisma(): ReturnType<typeof getPrisma> | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Ödeme callback Prisma client initialization failed:", error);
+    return null;
+  }
+}
+
 async function handleCallback(request: Request) {
   const payload = await resolvePayload(request);
 
   if (!payload.token) {
     return NextResponse.json({ error: "Token missing" }, { status: 400 });
+  }
+
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
   }
 
   const result = await retrieveCheckoutForm(payload.token, payload.conversationId);

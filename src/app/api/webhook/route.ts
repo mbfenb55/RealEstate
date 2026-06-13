@@ -1,18 +1,33 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
 const schema = z.object({
   type: z.enum(["shoot.completed", "payment.succeeded", "payment.failed"]),
   payload: z.record(z.any())
 });
 
+function resolvePrisma(): ReturnType<typeof getPrisma> | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Webhook Prisma client initialization failed:", error);
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   const secret = request.headers.get("x-webhook-secret");
 
   if (process.env.WEBHOOK_SECRET && secret !== process.env.WEBHOOK_SECRET) {
     return NextResponse.json({ error: "Invalid webhook secret" }, { status: 401 });
+  }
+
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
   }
 
   const event = schema.parse(await request.json());

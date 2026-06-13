@@ -4,7 +4,7 @@ import { z } from "zod";
 import { syncAuthUser } from "@/lib/auth-user";
 import { hasPublicSupabaseEnv } from "@/lib/env";
 import { initializeCheckoutForm } from "@/lib/iyzico";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { createClient } from "@/lib/supabase/server";
 
 const creditPlanMap: Record<string, number> = {
@@ -23,6 +23,15 @@ const schema = z.object({
   shootId: z.string().uuid().optional()
 });
 
+function resolvePrisma(): ReturnType<typeof getPrisma> | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Ödeme başlat Prisma client initialization failed:", error);
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   if (!hasPublicSupabaseEnv()) {
     return NextResponse.json(
@@ -40,7 +49,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  await syncAuthUser(user);
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+  }
+
+  await syncAuthUser(user, prisma);
 
   const payload = schema.parse(await request.json());
   const ipAddress =

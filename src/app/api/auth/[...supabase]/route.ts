@@ -4,7 +4,7 @@ import { z } from "zod";
 
 import { syncAuthUser } from "@/lib/auth-user";
 import { hasPublicSupabaseEnv } from "@/lib/env";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { sendWelcomeEmail } from "@/lib/resend";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient } from "@/lib/supabase/server";
@@ -23,6 +23,17 @@ type CurrentUserResult = {
   supabase: ReturnType<typeof createClient> | null;
   user: User | null;
 };
+
+type PrismaClientInstance = ReturnType<typeof getPrisma>;
+
+function resolvePrisma(): PrismaClientInstance | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Auth Prisma client initialization failed:", error);
+    return null;
+  }
+}
 
 async function getCurrentUser(): Promise<CurrentUserResult> {
   if (!hasPublicSupabaseEnv()) {
@@ -66,7 +77,13 @@ export async function GET(request: Request, { params }: { params: { supabase: st
       return NextResponse.json({ profile: null }, { status: 401 });
     }
 
-    const profile = await syncAuthUser(user);
+    const prisma = resolvePrisma();
+
+    if (!prisma) {
+      return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+    }
+
+    const profile = await syncAuthUser(user, prisma);
     return NextResponse.json({
       profile: {
         id: profile.id,
@@ -97,6 +114,12 @@ export async function POST(request: Request, { params }: { params: { supabase: s
 
     if (!user) {
       return NextResponse.json({ error: "Kullanıcı bulunamadı." }, { status: 401 });
+    }
+
+    const prisma = resolvePrisma();
+
+    if (!prisma) {
+      return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
     }
 
     await prisma.user.deleteMany({
@@ -132,6 +155,12 @@ export async function POST(request: Request, { params }: { params: { supabase: s
 
   if (payload.email && authUser.email !== payload.email) {
     return NextResponse.json({ error: "Kullanıcı doğrulanamadı." }, { status: 400 });
+  }
+
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
   }
 
   const existingUser = await prisma.user.findUnique({

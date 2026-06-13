@@ -1,10 +1,14 @@
 import { notFound } from "next/navigation";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { mapShootToRecord } from "@/lib/shoots";
 import { formatDate } from "@/lib/utils";
 
+export const dynamic = "force-dynamic";
+
 export default async function PublicSharePage({ params }: { params: { token: string } }) {
+  const prisma = getPrisma();
+
   const shoot = await prisma.shoot.findUnique({
     where: {
       publicToken: params.token

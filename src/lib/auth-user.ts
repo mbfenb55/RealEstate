@@ -1,8 +1,10 @@
 import type { User as SupabaseUser } from "@supabase/supabase-js";
+import type { PrismaClient } from "@prisma/client";
 
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 
-export async function syncAuthUser(authUser: SupabaseUser) {
+export async function syncAuthUser(authUser: SupabaseUser, prismaClient?: PrismaClient) {
+  const prisma = prismaClient ?? getPrisma();
   const metadata = authUser.user_metadata ?? {};
 
   return prisma.user.upsert({

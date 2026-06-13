@@ -4,7 +4,7 @@ import { z } from "zod";
 import { syncAuthUser } from "@/lib/auth-user";
 import { hasPublicSupabaseEnv } from "@/lib/env";
 import { scheduleMockShootProcessing } from "@/lib/mock-processing";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { mapShootToRecord } from "@/lib/shoots";
 import { createClient } from "@/lib/supabase/server";
 
@@ -25,7 +25,18 @@ const createShootSchema = z.object({
   requiredCredits: z.number().optional().default(1)
 });
 
-async function getAuthenticatedUser() {
+type PrismaClientInstance = ReturnType<typeof getPrisma>;
+
+function resolvePrisma(): PrismaClientInstance | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Çekim API Prisma client initialization failed:", error);
+    return null;
+  }
+}
+
+async function getAuthenticatedUser(prisma: PrismaClientInstance) {
   if (!hasPublicSupabaseEnv()) {
     return null;
   }
@@ -39,12 +50,18 @@ async function getAuthenticatedUser() {
     return null;
   }
 
-  const profile = await syncAuthUser(user);
+  const profile = await syncAuthUser(user, prisma);
   return { user, profile };
 }
 
 export async function GET() {
-  const auth = await getAuthenticatedUser();
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+  }
+
+  const auth = await getAuthenticatedUser(prisma);
 
   if (!auth) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -61,7 +78,13 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
-  const auth = await getAuthenticatedUser();
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+  }
+
+  const auth = await getAuthenticatedUser(prisma);
 
   if (!auth) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

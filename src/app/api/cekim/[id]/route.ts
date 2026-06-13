@@ -3,7 +3,7 @@ import { z } from "zod";
 
 import { syncAuthUser } from "@/lib/auth-user";
 import { hasPublicSupabaseEnv } from "@/lib/env";
-import { prisma } from "@/lib/prisma";
+import { getPrisma } from "@/lib/prisma";
 import { mapShootToRecord } from "@/lib/shoots";
 import { createClient } from "@/lib/supabase/server";
 
@@ -21,7 +21,18 @@ const updateShootSchema = z.object({
   completedAt: z.string().datetime().optional()
 });
 
-async function getAuthenticatedUser() {
+type PrismaClientInstance = ReturnType<typeof getPrisma>;
+
+function resolvePrisma(): PrismaClientInstance | null {
+  try {
+    return getPrisma();
+  } catch (error) {
+    console.error("Çekim detay Prisma client initialization failed:", error);
+    return null;
+  }
+}
+
+async function getAuthenticatedUser(prisma: PrismaClientInstance) {
   if (!hasPublicSupabaseEnv()) {
     return null;
   }
@@ -35,12 +46,18 @@ async function getAuthenticatedUser() {
     return null;
   }
 
-  await syncAuthUser(user);
+  await syncAuthUser(user, prisma);
   return user;
 }
 
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
-  const user = await getAuthenticatedUser();
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+  }
+
+  const user = await getAuthenticatedUser(prisma);
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -61,7 +78,13 @@ export async function GET(_request: Request, { params }: { params: { id: string 
 }
 
 export async function PATCH(request: Request, { params }: { params: { id: string } }) {
-  const user = await getAuthenticatedUser();
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+  }
+
+  const user = await getAuthenticatedUser(prisma);
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
@@ -100,7 +123,13 @@ export async function PATCH(request: Request, { params }: { params: { id: string
 }
 
 export async function DELETE(_request: Request, { params }: { params: { id: string } }) {
-  const user = await getAuthenticatedUser();
+  const prisma = resolvePrisma();
+
+  if (!prisma) {
+    return NextResponse.json({ error: "Veritabanı başlatılamadı." }, { status: 503 });
+  }
+
+  const user = await getAuthenticatedUser(prisma);
 
   if (!user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
