@@ -1,3 +1,7 @@
+import type { FeatureCollection } from "geojson";
+
+import type { OverpassPlace, ValueScoreResult } from "@/lib/value-score";
+
 export type ServiceItem = {
   slug: string;
   title: string;
@@ -134,6 +138,11 @@ export type WizardFormData = {
   coordinates?: [number, number];
   neighborhoodSummary?: string;
   validatedLocation?: boolean;
+  uploadedGeojson?: FeatureCollection;
+  geojsonFileName?: string;
+  geojsonFeatureCount?: number;
+  nearbyPlaces: OverpassPlace[];
+  valueScore?: ValueScoreResult;
   shootType: ShootType;
   estimatedCredits: number;
   logoUrl?: string;

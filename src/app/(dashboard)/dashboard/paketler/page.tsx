@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
 import { BadgePercent, CreditCard, Sparkles } from "lucide-react";
 
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCurrency } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,44 +46,6 @@ const creditPackages = [
 
 export default function PackagesPage() {
   const { profile } = useAuth();
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-
-  const startCheckout = async (plan: (typeof creditPackages)[number]) => {
-    if (plan.name === "25 Çekim") {
-      return;
-    }
-
-    setError(null);
-    setLoadingPlan(plan.name);
-
-    try {
-      const response = await fetch("/api/odeme/baslat", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          planName: plan.name,
-          amount: plan.amount
-        })
-      });
-
-      const payload = (await response.json()) as {
-        paymentPageUrl?: string;
-        error?: string;
-      };
-
-      if (!response.ok || !payload.paymentPageUrl) {
-        throw new Error(payload.error ?? "Ödeme sayfası başlatılamadı.");
-      }
-
-      window.location.assign(payload.paymentPageUrl);
-    } catch (checkoutError) {
-      setError(checkoutError instanceof Error ? checkoutError.message : "Ödeme başlatılamadı.");
-      setLoadingPlan(null);
-    }
-  };
 
   return (
     <div className="space-y-8">
@@ -92,7 +54,7 @@ export default function PackagesPage() {
           <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Paket Al</p>
           <h1 className="text-3xl font-semibold text-slate-900">Kredi paketleri</h1>
           <p className="max-w-3xl text-sm text-slate-500">
-            Kredi bakiyenizi artırın, İyzico ile güvenli ödeme yapın ve yeni çekimlerinizi kesintisiz sürdürün.
+            Ödeme sistemi canlıya alınana kadar pasif. Şimdilik mevcut kredilerinizle çekim üretmeye devam edin.
           </p>
         </div>
 
@@ -101,9 +63,13 @@ export default function PackagesPage() {
         </div>
       </div>
 
-      {error ? <p className="text-sm text-rose-500">{error}</p> : null}
+      {!PAYMENTS_ENABLED ? (
+        <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          Ödeme akışı geçici olarak pasif. Canlıya geçtiğimizde paket satın alma ve kartla ödeme tekrar aktif olacak.
+        </div>
+      ) : null}
 
-      <div className="grid gap-6 xl:grid-cols-4 md:grid-cols-2">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         {creditPackages.map((plan) => (
           <Card key={plan.name} className="rounded-[2rem] border-slate-200 bg-white shadow-sm">
             <CardContent className="flex h-full flex-col p-6">
@@ -134,11 +100,11 @@ export default function PackagesPage() {
               <div className="mt-6 space-y-3 text-sm text-slate-600">
                 <div className="flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-primary" />
-                  İyzico ile güvenli ödeme
+                  {PAYMENTS_ENABLED ? "İyzico ile güvenli ödeme" : "Ödeme akışı pasif"}
                 </div>
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-primary" />
-                  Krediler ödeme sonrası otomatik yüklenir
+                  {PAYMENTS_ENABLED ? "Krediler ödeme sonrasında otomatik yüklenir" : "Canlıda otomatik kredi yükleme açılacak"}
                 </div>
                 {plan.badge ? (
                   <div className="flex items-center gap-2">
@@ -156,14 +122,8 @@ export default function PackagesPage() {
                     </Button>
                   </Link>
                 ) : (
-                  <Button
-                    type="button"
-                    className="w-full"
-                    loading={loadingPlan === plan.name}
-                    loadingText="Yönlendiriliyor"
-                    onClick={() => void startCheckout(plan)}
-                  >
-                    Satın Al
+                  <Button type="button" className="w-full" disabled={!PAYMENTS_ENABLED}>
+                    {PAYMENTS_ENABLED ? "Satın Al" : "Yakında Aktif"}
                   </Button>
                 )}
               </div>

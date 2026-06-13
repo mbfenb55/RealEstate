@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { retrieveCheckoutForm } from "@/lib/iyzico";
 import { scheduleMockShootProcessing } from "@/lib/mock-processing";
 import { getPrisma } from "@/lib/prisma";
@@ -41,6 +42,13 @@ function resolvePrisma(): ReturnType<typeof getPrisma> | null {
 }
 
 async function handleCallback(request: Request) {
+  if (!PAYMENTS_ENABLED) {
+    return NextResponse.json(
+      { error: "Ödeme sistemi geçici olarak pasif. Callback işlenmiyor." },
+      { status: 410 }
+    );
+  }
+
   const payload = await resolvePayload(request);
 
   if (!payload.token) {

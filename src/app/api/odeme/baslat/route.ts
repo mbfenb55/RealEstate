@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { syncAuthUser } from "@/lib/auth-user";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { hasPublicSupabaseEnv } from "@/lib/env";
 import { initializeCheckoutForm } from "@/lib/iyzico";
 import { getPrisma } from "@/lib/prisma";
@@ -33,6 +34,13 @@ function resolvePrisma(): ReturnType<typeof getPrisma> | null {
 }
 
 export async function POST(request: Request) {
+  if (!PAYMENTS_ENABLED) {
+    return NextResponse.json(
+      { error: "Ödeme sistemi geçici olarak pasif. Canlıda tekrar aktif edilecek." },
+      { status: 503 }
+    );
+  }
+
   if (!hasPublicSupabaseEnv()) {
     return NextResponse.json(
       { error: "Ödeme altyapısı yerel önizleme için devre dışı. Gerçek Supabase bilgileri gerekiyor." },

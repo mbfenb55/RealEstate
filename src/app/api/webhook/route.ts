@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { getPrisma } from "@/lib/prisma";
 
 const schema = z.object({
@@ -31,6 +32,10 @@ export async function POST(request: Request) {
   }
 
   const event = schema.parse(await request.json());
+
+  if (!PAYMENTS_ENABLED && event.type.startsWith("payment.")) {
+    return NextResponse.json({ received: true, skipped: true });
+  }
 
   switch (event.type) {
     case "shoot.completed": {

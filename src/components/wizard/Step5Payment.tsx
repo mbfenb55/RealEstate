@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CreditCard, LockKeyhole, ShieldCheck } from "lucide-react";
 
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCreditAmount, getRequiredCreditUnits, getShootOption } from "@/lib/shoot-options";
 import { formatCurrency } from "@/lib/utils";
@@ -53,6 +54,8 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
   const selectedOption = useMemo(() => getShootOption(data.shootType), [data.shootType]);
   const requiredCreditUnits = useMemo(() => getRequiredCreditUnits(data.shootType), [data.shootType]);
   const canUseCredits = (profile?.credits ?? 0) >= requiredCreditUnits;
+  const paymentsAvailable = PAYMENTS_ENABLED;
+  const allowDemoWithoutCredits = !canUseCredits && !paymentsAvailable;
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -66,9 +69,9 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
     patchData({
       orderAmount: selectedOption.amount,
       estimatedCredits: selectedOption.credits,
-      needsPayment: !canUseCredits
+      needsPayment: !canUseCredits && paymentsAvailable
     });
-  }, [canUseCredits, patchData, selectedOption.amount, selectedOption.credits]);
+  }, [canUseCredits, paymentsAvailable, patchData, selectedOption.amount, selectedOption.credits]);
 
   const createShootPayload = () => ({
     type: data.shootType,
@@ -128,6 +131,17 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
         return;
       }
 
+      if (!paymentsAvailable) {
+        await refreshProfile();
+        setShowProcessing(true);
+        reset();
+        window.setTimeout(() => {
+          router.push("/dashboard");
+          router.refresh();
+        }, 3000);
+        return;
+      }
+
       const paymentResponse = await fetch("/api/odeme/baslat", {
         method: "POST",
         headers: {
@@ -151,7 +165,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
 
       window.location.assign(paymentPayload.paymentPageUrl);
     } catch (error) {
-      if (createdShootId && !canUseCredits) {
+      if (createdShootId && paymentsAvailable && !canUseCredits) {
         await fetch(`/api/cekim/${createdShootId}`, {
           method: "DELETE"
         }).catch(() => undefined);
@@ -216,7 +230,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
                 <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
                   Hesabınızdaki kredi bu çekim için yeterli. Onay verdiğiniz anda çekim kaydı oluşturulup işleme alınacaktır.
                 </div>
-              ) : (
+              ) : paymentsAvailable ? (
                 <form className="space-y-5" onSubmit={form.handleSubmit(handlePaymentSubmit)}>
                   <div className="space-y-2">
                     <Label htmlFor="cardNumber">Kart Numarası</Label>
@@ -285,6 +299,34 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
                     </Button>
                   </div>
                 </form>
+              ) : (
+                <div className="space-y-5">
+                  <div className="rounded-[1.5rem] border border-amber-200 bg-amber-50 p-5 text-sm text-amber-900">
+                    Ödeme sistemi geçici olarak pasif. Kredi yükleme ve kartla ödeme canlıya alındığında burada aktif olacak.
+                  </div>
+
+                  {allowDemoWithoutCredits ? (
+                    <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
+                      Krediniz olmadığı için bu adım demo modda ilerleyecek ve ödeme alınmayacak.
+                    </div>
+                  ) : null}
+
+                  {submitError ? <p className="text-sm text-rose-500">{submitError}</p> : null}
+
+                  <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
+                    <Button variant="outline" type="button" onClick={onBack} disabled={submitting}>
+                      Geri
+                    </Button>
+                    <Button
+                      type="button"
+                      loading={submitting}
+                      loadingText="Çekim hazırlanıyor"
+                      onClick={() => void handlePaymentSubmit()}
+                    >
+                      Demo Çekimini Başlat
+                    </Button>
+                  </div>
+                </div>
               )}
 
               {canUseCredits ? (
@@ -355,16 +397,18 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
               ))}
             </div>
 
-            <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
-              <div className="flex items-center gap-2">
-                <CreditCard className="h-5 w-5 text-secondary" />
-                <p className="font-semibold">Güvenli Ödeme</p>
+              <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="h-5 w-5 text-secondary" />
+                  <p className="font-semibold">Güvenli Ödeme</p>
+                </div>
+                <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
+                  <LockKeyhole className="h-4 w-4 text-secondary" />
+                  {paymentsAvailable
+                    ? "SSL ve İyzico 3D Secure koruması ile ödeme alınır."
+                    : "Ödeme akışı canlıya alınana kadar pasif durumda."}
+                </div>
               </div>
-              <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
-                <LockKeyhole className="h-4 w-4 text-secondary" />
-                SSL ve İyzico 3D Secure koruması ile ödeme alınır.
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>

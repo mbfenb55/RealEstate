@@ -5,6 +5,7 @@ import { ThemeProvider } from "@/components/shared/ThemeProvider";
 import { ToastProvider } from "@/components/shared/ToastProvider";
 import { buildPageMetadata } from "@/lib/metadata";
 import "./globals.css";
+import "leaflet/dist/leaflet.css";
 
 const inter = Inter({
   subsets: ["latin", "latin-ext"],

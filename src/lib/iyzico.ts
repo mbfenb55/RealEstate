@@ -1,5 +1,7 @@
 import crypto from "node:crypto";
 
+import { PAYMENTS_ENABLED } from "@/lib/features";
+
 const defaultBaseUrl = process.env.IYZICO_BASE_URL ?? "https://sandbox-api.iyzipay.com";
 
 export type IyzicoBasketItem = {
@@ -28,6 +30,10 @@ export type IyzicoInitializePayload = {
 };
 
 function getIyzicoSecrets() {
+  if (!PAYMENTS_ENABLED) {
+    throw new Error("Ödeme sistemi geçici olarak pasif.");
+  }
+
   const apiKey = process.env.IYZICO_API_KEY;
   const secretKey = process.env.IYZICO_SECRET_KEY;
 

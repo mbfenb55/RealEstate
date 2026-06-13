@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { syncAuthUser } from "@/lib/auth-user";
+import { PAYMENTS_ENABLED } from "@/lib/features";
 import { hasPublicSupabaseEnv } from "@/lib/env";
 import { scheduleMockShootProcessing } from "@/lib/mock-processing";
 import { getPrisma } from "@/lib/prisma";
@@ -135,7 +136,7 @@ export async function POST(request: Request) {
     return { shoot, credits };
   });
 
-  if (payload.useCredits) {
+  if (payload.useCredits || !PAYMENTS_ENABLED) {
     scheduleMockShootProcessing(result.shoot.id);
   }
 
