@@ -2,6 +2,7 @@
 
 import { Bell, Menu } from "lucide-react";
 
+import { isAdmin } from "@/lib/admin";
 import { useAuth } from "@/hooks/useAuth";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -21,7 +22,8 @@ export function DashboardHeader({
 }: {
   onMenuClick: () => void;
 }) {
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
+  const adminUser = isAdmin(profile?.email ?? user?.email ?? "");
 
   return (
     <header className="flex items-center justify-between gap-4 border-b border-slate-200 px-4 py-4 sm:px-6">
@@ -31,9 +33,16 @@ export function DashboardHeader({
         </Button>
         <div>
           <p className="text-sm text-slate-500">Hoş geldiniz</p>
-          <h2 className="text-lg font-semibold text-slate-900">
-            {profile?.fullName || profile?.companyName || "Parselim Panel"}
-          </h2>
+          <div className="flex flex-wrap items-center gap-2">
+            <h2 className="text-lg font-semibold text-slate-900">
+              {profile?.fullName || profile?.companyName || "Parselim Panel"}
+            </h2>
+            {adminUser ? (
+              <Badge variant="success" className="px-2.5 py-1 text-[11px] font-semibold uppercase tracking-[0.18em]">
+                Admin Paneli
+              </Badge>
+            ) : null}
+          </div>
         </div>
       </div>
 

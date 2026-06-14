@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { isAdmin } from "@/lib/admin";
 import { syncAuthUser } from "@/lib/auth-user";
 import { PAYMENTS_ENABLED } from "@/lib/features";
 import { hasPublicSupabaseEnv } from "@/lib/env";
@@ -91,10 +92,11 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const adminUser = isAdmin(auth.user.email ?? auth.profile.email ?? "");
   const payload = createShootSchema.parse(await request.json());
   const creditsToCharge = Math.max(1, Math.ceil(payload.requiredCredits));
 
-  if (payload.useCredits && auth.profile.credits < creditsToCharge) {
+  if (!adminUser && payload.useCredits && auth.profile.credits < creditsToCharge) {
     return NextResponse.json({ error: "Yeterli krediniz bulunmuyor." }, { status: 402 });
   }
 
@@ -121,7 +123,7 @@ export async function POST(request: Request) {
 
     let credits = auth.profile.credits;
 
-    if (payload.useCredits) {
+    if (payload.useCredits && !adminUser) {
       const updatedUser = await tx.user.update({
         where: { id: auth.user.id },
         data: {
@@ -136,7 +138,7 @@ export async function POST(request: Request) {
     return { shoot, credits };
   });
 
-  if (payload.useCredits || !PAYMENTS_ENABLED) {
+  if (payload.useCredits || !PAYMENTS_ENABLED || adminUser) {
     scheduleMockShootProcessing(result.shoot.id);
   }
 

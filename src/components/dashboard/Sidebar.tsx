@@ -2,8 +2,20 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { BellRing, CreditCard, FileText, Home, ListVideo, LogOut, PlusCircle, Settings, X } from "lucide-react";
+import {
+  BellRing,
+  CreditCard,
+  FileText,
+  Home,
+  ListVideo,
+  LogOut,
+  PlusCircle,
+  Settings,
+  ShieldCheck,
+  X
+} from "lucide-react";
 
+import { isAdmin } from "@/lib/admin";
 import { useAuth } from "@/hooks/useAuth";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -36,7 +48,11 @@ export function Sidebar({
 }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { profile, signOut } = useAuth();
+  const { profile, user, signOut } = useAuth();
+  const adminUser = isAdmin(profile?.email ?? user?.email ?? "");
+  const navItems = adminUser
+    ? [...items, { href: "/dashboard/admin", label: "Admin Paneli", icon: ShieldCheck }]
+    : items;
 
   const handleLogout = async () => {
     await signOut();
@@ -77,7 +93,7 @@ export function Sidebar({
         </div>
 
         <nav className="flex-1 space-y-1 px-3 py-5">
-          {items.map((item) => {
+          {navItems.map((item) => {
             const active = pathname === item.href;
             return (
               <Link

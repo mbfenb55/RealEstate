@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { CreditCard, LockKeyhole, ShieldCheck } from "lucide-react";
 
+import { isAdmin } from "@/lib/admin";
 import { PAYMENTS_ENABLED } from "@/lib/features";
 import { useAuth } from "@/hooks/useAuth";
 import { formatCreditAmount, getRequiredCreditUnits, getShootOption } from "@/lib/shoot-options";
@@ -47,15 +48,19 @@ function formatExpiry(value: string) {
 export function Step5Payment({ onBack }: { onBack: () => void }) {
   const router = useRouter();
   const { data, patchData, reset } = useWizardStore();
-  const { profile, refreshProfile } = useAuth();
+  const { profile, user, refreshProfile } = useAuth();
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [showProcessing, setShowProcessing] = useState(false);
+
   const selectedOption = useMemo(() => getShootOption(data.shootType), [data.shootType]);
   const requiredCreditUnits = useMemo(() => getRequiredCreditUnits(data.shootType), [data.shootType]);
-  const canUseCredits = (profile?.credits ?? 0) >= requiredCreditUnits;
+  const adminUser = isAdmin(profile?.email ?? user?.email ?? "");
+  const canUseCredits = !adminUser && (profile?.credits ?? 0) >= requiredCreditUnits;
   const paymentsAvailable = PAYMENTS_ENABLED;
-  const allowDemoWithoutCredits = !canUseCredits && !paymentsAvailable;
+  const paymentRequired = !adminUser && !canUseCredits && paymentsAvailable;
+  const allowDemoWithoutCredits = !adminUser && !canUseCredits && !paymentsAvailable;
+
   const form = useForm<PaymentFormValues>({
     resolver: zodResolver(paymentSchema),
     defaultValues: {
@@ -69,9 +74,9 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
     patchData({
       orderAmount: selectedOption.amount,
       estimatedCredits: selectedOption.credits,
-      needsPayment: !canUseCredits && paymentsAvailable
+      needsPayment: paymentRequired
     });
-  }, [canUseCredits, paymentsAvailable, patchData, selectedOption.amount, selectedOption.credits]);
+  }, [patchData, paymentRequired, selectedOption.amount, selectedOption.credits]);
 
   const createShootPayload = () => ({
     type: data.shootType,
@@ -89,7 +94,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
       summary: data.neighborhoodSummary,
       labels: data.nearbyLabels
     },
-    useCredits: canUseCredits,
+    useCredits: !adminUser && canUseCredits,
     requiredCredits: selectedOption.credits
   });
 
@@ -120,18 +125,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
 
       createdShootId = shootPayload.item.id;
 
-      if (canUseCredits) {
-        await refreshProfile();
-        setShowProcessing(true);
-        reset();
-        window.setTimeout(() => {
-          router.push("/dashboard");
-          router.refresh();
-        }, 3000);
-        return;
-      }
-
-      if (!paymentsAvailable) {
+      if (adminUser || canUseCredits || !paymentsAvailable) {
         await refreshProfile();
         setShowProcessing(true);
         reset();
@@ -165,7 +159,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
 
       window.location.assign(paymentPayload.paymentPageUrl);
     } catch (error) {
-      if (createdShootId && paymentsAvailable && !canUseCredits) {
+      if (createdShootId && paymentsAvailable && !canUseCredits && !adminUser) {
         await fetch(`/api/cekim/${createdShootId}`, {
           method: "DELETE"
         }).catch(() => undefined);
@@ -216,7 +210,11 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
 
               <div className="rounded-[1.5rem] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                 <p className="font-semibold text-slate-900">
-                  {canUseCredits ? `${requiredCreditUnits} kredi kullanılacak` : "Kredi yetersiz, güvenli ödeme gerekli"}
+                  {adminUser
+                    ? "Admin modu aktif"
+                    : canUseCredits
+                      ? `${requiredCreditUnits} kredi kullanılacak`
+                      : "Kredi yetersiz, güvenli ödeme gerekli"}
                 </p>
                 <p className="mt-2">
                   Seçilen hizmet {formatCreditAmount(selectedOption.credits)} kredi değerindedir.
@@ -226,7 +224,16 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
                 </p>
               </div>
 
-              {canUseCredits ? (
+              {adminUser ? (
+                <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
+                  <div className="mb-3 inline-flex rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-700">
+                    Admin modu - ödeme atlandı
+                  </div>
+                  <p>
+                    Yönetici hesabı için kredi kontrolü uygulanmaz. Çekimi doğrudan başlatabilirsiniz.
+                  </p>
+                </div>
+              ) : canUseCredits ? (
                 <div className="rounded-[1.5rem] border border-emerald-200 bg-emerald-50 p-5 text-sm text-emerald-900">
                   Hesabınızdaki kredi bu çekim için yeterli. Onay verdiğiniz anda çekim kaydı oluşturulup işleme alınacaktır.
                 </div>
@@ -329,7 +336,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
                 </div>
               )}
 
-              {canUseCredits ? (
+              {(adminUser || canUseCredits) ? (
                 <>
                   {submitError ? <p className="text-sm text-rose-500">{submitError}</p> : null}
                   <div className="flex flex-col gap-3 sm:flex-row sm:justify-between">
@@ -348,6 +355,7 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
                   </div>
                 </>
               ) : null}
+
             </CardContent>
           </Card>
         </div>
@@ -397,18 +405,18 @@ export function Step5Payment({ onBack }: { onBack: () => void }) {
               ))}
             </div>
 
-              <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
-                <div className="flex items-center gap-2">
-                  <CreditCard className="h-5 w-5 text-secondary" />
-                  <p className="font-semibold">Güvenli Ödeme</p>
-                </div>
-                <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
-                  <LockKeyhole className="h-4 w-4 text-secondary" />
-                  {paymentsAvailable
-                    ? "SSL ve İyzico 3D Secure koruması ile ödeme alınır."
-                    : "Ödeme akışı canlıya alınana kadar pasif durumda."}
-                </div>
+            <div className="rounded-[1.5rem] bg-slate-950 p-5 text-white">
+              <div className="flex items-center gap-2">
+                <CreditCard className="h-5 w-5 text-secondary" />
+                <p className="font-semibold">Güvenli Ödeme</p>
               </div>
+              <div className="mt-3 flex items-center gap-2 text-sm text-slate-300">
+                <LockKeyhole className="h-4 w-4 text-secondary" />
+                {paymentsAvailable
+                  ? "SSL ve İyzico 3D Secure koruması ile ödeme alınır."
+                  : "Ödeme akışı canlıya alınana kadar pasif durumda."}
+              </div>
+            </div>
           </CardContent>
         </Card>
       </div>

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
+import { isAdmin } from "@/lib/admin";
 import { syncAuthUser } from "@/lib/auth-user";
 import { hasPublicSupabaseEnv } from "@/lib/env";
 import { getPrisma } from "@/lib/prisma";
@@ -50,6 +51,10 @@ async function getAuthenticatedUser(prisma: PrismaClientInstance) {
   return user;
 }
 
+function getAccessFilter(shootId: string, userId: string, canAccessAll: boolean) {
+  return canAccessAll ? { id: shootId } : { id: shootId, userId };
+}
+
 export async function GET(_request: Request, { params }: { params: { id: string } }) {
   const prisma = resolvePrisma();
 
@@ -63,11 +68,9 @@ export async function GET(_request: Request, { params }: { params: { id: string 
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const adminUser = isAdmin(user.email ?? "");
   const shoot = await prisma.shoot.findFirst({
-    where: {
-      id: params.id,
-      userId: user.id
-    }
+    where: getAccessFilter(params.id, user.id, adminUser)
   });
 
   if (!shoot) {
@@ -90,12 +93,10 @@ export async function PATCH(request: Request, { params }: { params: { id: string
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const adminUser = isAdmin(user.email ?? "");
   const payload = updateShootSchema.parse(await request.json());
   const result = await prisma.shoot.updateMany({
-    where: {
-      id: params.id,
-      userId: user.id
-    },
+    where: getAccessFilter(params.id, user.id, adminUser),
     data: {
       status: payload.status,
       type: payload.type,
@@ -135,11 +136,9 @@ export async function DELETE(_request: Request, { params }: { params: { id: stri
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const adminUser = isAdmin(user.email ?? "");
   const deleted = await prisma.shoot.deleteMany({
-    where: {
-      id: params.id,
-      userId: user.id
-    }
+    where: getAccessFilter(params.id, user.id, adminUser)
   });
 
   if (!deleted.count) {

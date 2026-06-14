@@ -15,6 +15,8 @@ export async function updateSession(request: NextRequest) {
 
   if (!hasPublicSupabaseEnv()) {
     response.headers.set("x-user-authenticated", "false");
+    response.headers.set("x-user-email", "");
+    response.headers.set("x-user-id", "");
     return response;
   }
 
@@ -38,5 +40,7 @@ export async function updateSession(request: NextRequest) {
   } = await supabase.auth.getUser();
 
   response.headers.set("x-user-authenticated", user ? "true" : "false");
+  response.headers.set("x-user-email", user?.email ?? "");
+  response.headers.set("x-user-id", user?.id ?? "");
   return response;
 }
