@@ -2,14 +2,20 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 
 import { getNearbyPlaces } from "@/lib/google-places";
-import { createStaticMapUrl, geocodeAddress } from "@/lib/mapbox";
+import { createStaticMapUrl } from "@/lib/mapbox";
+
+type NominatimResult = {
+  lat: string;
+  lon: string;
+  display_name?: string;
+};
 
 const schema = z.object({
   intent: z.enum(["validate", "nearby"]).default("validate"),
   adaNo: z.string().optional(),
   parselNo: z.string().optional(),
-  il: z.string().optional(),
-  ilce: z.string().optional(),
+  il: z.string().trim().optional(),
+  ilce: z.string().trim().optional(),
   coordinates: z.tuple([z.number(), z.number()]).optional(),
   propertyType: z.string().optional().default("arsa")
 });
@@ -22,39 +28,99 @@ const cityScores: Record<string, { investment: number; accessibility: number; to
   Antalya: { investment: 90, accessibility: 85, tourism: 95 }
 };
 
-function deriveOffset(base: number, seed: string, precision: number) {
-  const numericSeed = Number.parseInt(seed.replace(/\D/g, "").slice(0, 6) || "0", 10);
-  return base + ((numericSeed % 23) - 11) * precision;
+function resolveDisplayLocation(il?: string, ilce?: string) {
+  return [ilce?.trim(), il?.trim()].filter(Boolean).join(", ");
+}
+
+async function geocodeWithNominatim(il?: string, ilce?: string) {
+  const queries = [
+    resolveDisplayLocation(il, ilce),
+    il?.trim() ? `${il.trim()} Turkey` : ""
+  ].filter((query): query is string => Boolean(query));
+
+  for (const query of queries) {
+    const url = new URL("https://nominatim.openstreetmap.org/search");
+    url.search = new URLSearchParams({
+      q: query,
+      format: "json",
+      limit: "1",
+      countrycodes: "tr"
+    }).toString();
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        Accept: "application/json",
+        "Accept-Language": "tr-TR,tr;q=0.9",
+        "User-Agent": "Parselim/1.0 (support@parselim.com)"
+      },
+      cache: "no-store"
+    });
+
+    if (!response.ok) {
+      continue;
+    }
+
+    const data = (await response.json()) as NominatimResult[];
+    const firstResult = data[0];
+
+    if (!firstResult) {
+      continue;
+    }
+
+    const latitude = Number(firstResult.lat);
+    const longitude = Number(firstResult.lon);
+
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
+      continue;
+    }
+
+    return {
+      coordinates: [longitude, latitude] as [number, number],
+      resolvedAddress: firstResult.display_name ?? query
+    };
+  }
+
+  return null;
 }
 
 export async function POST(request: Request) {
   const payload = schema.parse(await request.json());
+  const resolvedLocation = payload.coordinates
+    ? {
+        coordinates: payload.coordinates,
+        resolvedAddress: resolveDisplayLocation(payload.il, payload.ilce) || "Belirtilen konum"
+      }
+    : await geocodeWithNominatim(payload.il, payload.ilce);
 
-  const locationQuery = payload.ilce && payload.il ? `${payload.ilce}, ${payload.il}, Türkiye` : payload.il ?? "İstanbul";
-  const geocoded = payload.coordinates ? null : await geocodeAddress(locationQuery);
-  const baseCoordinates = payload.coordinates ?? geocoded?.center ?? [28.9784, 41.0082];
-  const coordinates: [number, number] = [
-    deriveOffset(baseCoordinates[0], payload.adaNo ?? payload.parselNo ?? "0", 0.0015),
-    deriveOffset(baseCoordinates[1], payload.parselNo ?? payload.adaNo ?? "0", 0.0012)
-  ];
+  if (!resolvedLocation) {
+    return NextResponse.json(
+      {
+        error: "Konum OpenStreetMap ile çözümlenemedi. İl ve ilçe bilgilerini kontrol edin."
+      },
+      { status: 400 }
+    );
+  }
+
+  const coordinates = resolvedLocation.coordinates;
+  const city = payload.il?.trim() ?? "";
+  const district = payload.ilce?.trim() ?? "";
+  const locationLabel = resolveDisplayLocation(city, district) || resolvedLocation.resolvedAddress;
+  const base = cityScores[city] ?? { investment: 78, accessibility: 74, tourism: 66 };
+  const droneSuitability = Math.min(95, Math.round((base.accessibility + base.tourism) / 2));
+  const mapSnapshot = createStaticMapUrl(coordinates[0], coordinates[1]);
+  const neighborhoodSummary = `${locationLabel} çevresinde ulaşım ve görünürlük dengesi güçlü. ${payload.propertyType} için dijital tanıtım çıktısı üretmeye uygun bir lokasyon özeti hazırlandı.`;
 
   if (payload.intent === "nearby") {
     const nearby = await getNearbyPlaces(coordinates);
     return NextResponse.json({
       coordinates,
+      neighborhoodSummary,
       nearby
     });
   }
 
-  const city = payload.il ?? geocoded?.city ?? "İstanbul";
-  const district = payload.ilce ?? geocoded?.district ?? "Merkez";
-  const base = cityScores[city] ?? { investment: 78, accessibility: 74, tourism: 66 };
-  const droneSuitability = Math.min(95, Math.round((base.accessibility + base.tourism) / 2));
-  const mapSnapshot = createStaticMapUrl(coordinates[0], coordinates[1]);
-  const neighborhoodSummary = `${district}, ${city} çevresinde ulaşım ve görünürlük dengesi güçlü. ${payload.propertyType} için dijital tanıtım çıktısı üretmeye uygun bir lokasyon özeti elde edildi.`;
-
   return NextResponse.json({
-    resolvedAddress: geocoded?.address ?? `${district}, ${city}`,
+    resolvedAddress: resolvedLocation.resolvedAddress,
     coordinates,
     neighborhoodSummary,
     scores: {

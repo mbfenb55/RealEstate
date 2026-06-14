@@ -60,16 +60,16 @@ function MapViewport({
   const map = useMap();
 
   useEffect(() => {
+    if (typeof latitude === "number" && typeof longitude === "number") {
+      map.flyTo([latitude, longitude], 13);
+      return;
+    }
+
     if (geojsonData && geoJsonRef.current) {
       const bounds = geoJsonRef.current.getBounds();
       if (bounds.isValid()) {
         map.fitBounds(bounds.pad(0.15));
       }
-      return;
-    }
-
-    if (typeof latitude === "number" && typeof longitude === "number") {
-      map.setView([latitude, longitude], 16, { animate: true });
     }
   }, [geoJsonRef, geojsonData, latitude, longitude, map]);
 
