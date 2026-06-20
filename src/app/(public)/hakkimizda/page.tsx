@@ -1,20 +1,23 @@
-export const metadata = {
-  title: "Hakkımızda | Parselim",
-  description: "Parselim, Türkiye'nin yapay zeka destekli emlak görselleştirme platformudur.",
-  alternates: { canonical: "https://parselim.com/hakkimizda" }
-};
-
 import { Card, CardContent } from "@/components/ui/card";
+import { getAppUrl } from "@/lib/env";
+
+const appUrl = getAppUrl();
+
+export const metadata = {
+  title: "Hakkimizda | Parselim",
+  description: "Parselim, Turkiye'nin yapay zeka destekli emlak gorsellestirme platformudur.",
+  alternates: { canonical: `${appUrl}/hakkimizda` }
+};
 
 export default function AboutPage() {
   return (
     <main className="container py-16">
       <div className="space-y-4">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Hakkımızda</p>
-        <h1 className="section-heading">Drone üretimini daha ölçülebilir ve daha hızlı hale getiriyoruz</h1>
+        <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Hakkimizda</p>
+        <h1 className="section-heading">Drone uretimini daha olculebilir ve daha hizli hale getiriyoruz</h1>
         <p className="section-copy">
-          Parselim, emlak danışmanları, proje geliştiriciler ve arsa yatırım ekipleri için yapay zeka destekli
-          içerik üretimi altyapısı sunar.
+          Parselim, emlak danismanlari, proje gelistiriciler ve arsa yatirim ekipleri icin yapay zeka destekli
+          icerik uretimi altyapisi sunar.
         </p>
       </div>
 
@@ -22,15 +25,15 @@ export default function AboutPage() {
         {[
           {
             title: "Misyon",
-            body: "Saha çekimlerini, analiz ve satış anlatısını tek platformda birleştirerek ekiplerin üretim hızını artırmak."
+            body: "Saha cekimlerini, analiz ve satis anlatisini tek platformda birlestirerek ekiplerin uretim hizini artirmak."
           },
           {
-            title: "Yaklaşım",
-            body: "Türkiye pazarına uygun ödeme, Türkçe seslendirme, yerel harita içgörüleri ve operasyon odaklı panel tasarımı."
+            title: "Yaklasim",
+            body: "Turkiye pazarina uygun odeme, Turkce seslendirme, yerel harita icgoruleri ve operasyon odakli panel tasarimi."
           },
           {
-            title: "Kimler için",
-            body: "Bireysel danışmanlardan kurumsal geliştiricilere kadar görsel sunumu gelir kaldıraç olarak kullanan ekipler."
+            title: "Kimler icin",
+            body: "Bireysel danismanlardan kurumsal gelistiricilere kadar gorsel sunumu gelir kaldirac olarak kullanan ekipler."
           }
         ].map((item) => (
           <Card key={item.title} className="rounded-[2rem]">

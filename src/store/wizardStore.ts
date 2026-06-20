@@ -2,10 +2,13 @@
 
 import { create } from "zustand";
 
+import { ADMIN_EMAIL, isAdmin } from "@/lib/admin";
+import { hasPublicSupabaseEnv } from "@/lib/env";
 import type { NearbyLabelSelection, WizardFormData } from "@/types";
 
 type WizardState = {
   currentStep: number;
+  adminSessionBypass: boolean;
   data: WizardFormData;
   setStep: (step: number) => void;
   patchData: (data: Partial<WizardFormData>) => void;
@@ -47,6 +50,7 @@ const initialData: WizardFormData = {
 
 export const useWizardStore = create<WizardState>((set) => ({
   currentStep: 1,
+  adminSessionBypass: !hasPublicSupabaseEnv() && isAdmin(ADMIN_EMAIL),
   data: initialData,
   setStep: (currentStep) => set({ currentStep }),
   patchData: (data) =>
@@ -116,6 +120,7 @@ export const useWizardStore = create<WizardState>((set) => ({
   reset: () =>
     set({
       currentStep: 1,
+      adminSessionBypass: !hasPublicSupabaseEnv() && isAdmin(ADMIN_EMAIL),
       data: initialData
     })
 }));

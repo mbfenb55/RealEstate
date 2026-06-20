@@ -1,0 +1,49 @@
+name: Vercel Deploy
+
+on:
+  push:
+    branches:
+      - "**"
+  workflow_dispatch:
+
+concurrency:
+  group: vercel-deploy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    env:
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Vercel CLI
+        run: npm install --global vercel@latest
+
+      - name: Choose deploy target
+        run: |
+          if [ "${GITHUB_REF}" = "refs/heads/main" ]; then
+            echo "VERCEL_ENV=production" >> "$GITHUB_ENV"
+            echo "VERCEL_DEPLOY_FLAGS=--prod" >> "$GITHUB_ENV"
+          else
+            echo "VERCEL_ENV=preview" >> "$GITHUB_ENV"
+            echo "VERCEL_DEPLOY_FLAGS=" >> "$GITHUB_ENV"
+          fi
+
+      - name: Pull Vercel project settings
+        run: vercel pull --yes --environment="$VERCEL_ENV" --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Build with Vercel
+        run: vercel build $VERCEL_DEPLOY_FLAGS --token="${{ secrets.VERCEL_TOKEN }}"
+
+      - name: Deploy to Vercel
+        run: vercel deploy --prebuilt $VERCEL_DEPLOY_FLAGS --token="${{ secrets.VERCEL_TOKEN }}"

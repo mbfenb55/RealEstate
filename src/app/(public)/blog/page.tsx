@@ -1,20 +1,23 @@
-export const metadata = {
-  title: "Blog | Parselim",
-  description: "Emlak sektöründe yapay zeka, sanal tur ve dijital pazarlama hakkında güncel yazılar.",
-  alternates: { canonical: "https://parselim.com/blog" }
-};
-
 import Link from "next/link";
 
 import { Card, CardContent } from "@/components/ui/card";
+import { getAppUrl } from "@/lib/env";
 import { blogPosts, formatDate } from "@/lib/utils";
+
+const appUrl = getAppUrl();
+
+export const metadata = {
+  title: "Blog | Parselim",
+  description: "Emlak sektorunde yapay zeka, sanal tur ve dijital pazarlama hakkinda guncel yazilar.",
+  alternates: { canonical: `${appUrl}/blog` }
+};
 
 export default function BlogPage() {
   return (
     <main className="container py-16">
       <div className="space-y-4">
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-primary">Blog</p>
-        <h1 className="section-heading">Drone, arsa analizi ve satış operasyonu üzerine içerikler</h1>
+        <h1 className="section-heading">Drone, arsa analizi ve satis operasyonu uzerine icerikler</h1>
       </div>
 
       <div className="mt-12 grid gap-6 lg:grid-cols-3">

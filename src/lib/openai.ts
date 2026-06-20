@@ -1,6 +1,10 @@
 import OpenAI from "openai";
 
-const model = process.env.OPENAI_MODEL ?? "gpt-4o";
+export const OPENAI_MODEL = process.env.OPENAI_MODEL ?? "gpt-4o";
+
+export function getOpenAIModel() {
+  return OPENAI_MODEL;
+}
 
 export function getOpenAIClient() {
   if (!process.env.OPENAI_API_KEY) {
@@ -32,7 +36,7 @@ export async function generateVoiceoverText({
   const client = getOpenAIClient();
 
   const response = await client.responses.create({
-    model,
+    model: OPENAI_MODEL,
     input: [
       {
         role: "developer",

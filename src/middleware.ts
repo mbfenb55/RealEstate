@@ -30,7 +30,7 @@ export async function middleware(request: NextRequest) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = isAuthenticated ? "/dashboard" : "/giris";
     if (!isAuthenticated) {
-      redirectUrl.searchParams.set("redirect", pathname);
+      redirectUrl.searchParams.set("redirectTo", pathname);
     }
     return NextResponse.redirect(redirectUrl);
   }
@@ -38,7 +38,7 @@ export async function middleware(request: NextRequest) {
   if (isDashboardRoute && !isAuthenticated) {
     const redirectUrl = request.nextUrl.clone();
     redirectUrl.pathname = "/giris";
-    redirectUrl.searchParams.set("redirect", pathname);
+    redirectUrl.searchParams.set("redirectTo", pathname);
     return NextResponse.redirect(redirectUrl);
   }
 

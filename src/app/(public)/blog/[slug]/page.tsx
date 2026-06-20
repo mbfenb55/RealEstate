@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 
+import { getAppUrl } from "@/lib/env";
 import { blogPosts, formatDate, getBlogPostBySlug } from "@/lib/utils";
+
+const appUrl = getAppUrl();
 
 export function generateStaticParams() {
   return blogPosts.map((post) => ({ slug: post.slug }));
@@ -12,14 +15,14 @@ export function generateMetadata({ params }: { params: { slug: string } }) {
   if (!post) {
     return {
       title: "Blog | Parselim",
-      description: "Parselim blog yazıları"
+      description: "Parselim blog yazilari"
     };
   }
 
   return {
     title: `${post.title} | Parselim`,
     description: post.excerpt,
-    alternates: { canonical: `https://parselim.com/blog/${post.slug}` }
+    alternates: { canonical: `${appUrl}/blog/${post.slug}` }
   };
 }
 

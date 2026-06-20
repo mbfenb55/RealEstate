@@ -1,7 +1,9 @@
 import type { MetadataRoute } from "next";
 
+import { getAppUrl } from "@/lib/env";
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://parselim.com";
+  const baseUrl = getAppUrl();
 
   return [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },

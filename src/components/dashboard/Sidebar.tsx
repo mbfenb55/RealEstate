@@ -9,21 +9,23 @@ import {
   Home,
   ListVideo,
   LogOut,
+  Map,
   PlusCircle,
   Settings,
   ShieldCheck,
   X
 } from "lucide-react";
 
-import { isAdmin } from "@/lib/admin";
 import { useAuth } from "@/hooks/useAuth";
+import { isAdmin } from "@/lib/admin";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
 const items = [
   { href: "/dashboard", label: "Dashboard", icon: Home },
-  { href: "/dashboard/yeni-cekim", label: "Yeni Çekim", icon: PlusCircle },
-  { href: "/dashboard/cekimlerim", label: "Çekimlerim", icon: ListVideo },
+  { href: "/dashboard/yeni-cekim", label: "Yeni Cekim", icon: PlusCircle },
+  { href: "/dashboard/parsel-yukle", label: "Parsel Analizi", icon: Map },
+  { href: "/dashboard/cekimlerim", label: "Cekimlerim", icon: ListVideo },
   { href: "/dashboard/paketler", label: "Paket Al", icon: CreditCard },
   { href: "/dashboard/faturalar", label: "Faturalar", icon: FileText },
   { href: "/dashboard/ayarlar", label: "Ayarlar", icon: Settings }
@@ -31,6 +33,7 @@ const items = [
 
 function initials(name?: string | null) {
   if (!name) return "DU";
+
   return name
     .split(" ")
     .map((part) => part[0])
@@ -95,6 +98,7 @@ export function Sidebar({
         <nav className="flex-1 space-y-1 px-3 py-5">
           {navItems.map((item) => {
             const active = pathname === item.href;
+
             return (
               <Link
                 key={item.href}
@@ -116,8 +120,8 @@ export function Sidebar({
                 <BellRing className="h-5 w-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-900">İlk çekim ücretsiz</p>
-                <p className="text-xs text-slate-500">Kalan kredinizi hemen kullanın</p>
+                <p className="text-sm font-semibold text-slate-900">Ilk cekim ucretsiz</p>
+                <p className="text-xs text-slate-500">Kalan kredinizi hemen kullanin</p>
               </div>
             </div>
           </div>
@@ -129,14 +133,14 @@ export function Sidebar({
               {initials(profile?.fullName)}
             </div>
             <div className="min-w-0">
-              <p className="truncate text-sm font-semibold text-slate-900">{profile?.fullName || "Kullanıcı"}</p>
+              <p className="truncate text-sm font-semibold text-slate-900">{profile?.fullName || "Kullanici"}</p>
               <p className="truncate text-xs text-slate-500">{profile?.email || "E-posta yok"}</p>
             </div>
           </div>
 
           <Button type="button" variant="outline" className="mt-3 w-full justify-start" onClick={handleLogout}>
             <LogOut className="h-4 w-4" />
-            Çıkış Yap
+            Cikis Yap
           </Button>
         </div>
       </aside>

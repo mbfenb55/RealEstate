@@ -4,53 +4,90 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres.msummyxjiwusxuhjryqk:Terramony2024@aws-1-eu-central-1.pooler.supabase.com:5432/postgres"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id          String    @id @default(uuid()) @db.Uuid
-  email       String    @unique
-  fullName    String?   @map("full_name")
-  companyName String?   @map("company_name")
-  phone       String?
-  logoUrl     String?   @map("logo_url")
-  brandColor  String?   @default("#1E3A8A") @map("brand_color")
-  credits     Int       @default(1)
-  createdAt   DateTime  @default(now()) @map("created_at")
-  invoices    Invoice[]
-  payments    Payment[]
-  shoots      Shoot[]
+  id             String           @id @default(uuid()) @db.Uuid
+  email          String           @unique
+  fullName       String?          @map("full_name")
+  companyName    String?          @map("company_name")
+  phone          String?
+  logoUrl        String?          @map("logo_url")
+  brandColor     String?          @default("#1E3A8A") @map("brand_color")
+  credits        Int              @default(1)
+  createdAt      DateTime         @default(now()) @map("created_at")
+  invoices       Invoice[]
+  parcelAnalyses ParcelAnalysis[]
+  payments       Payment[]
+  shoots         Shoot[]
 
   @@map("users")
 }
 
 model Shoot {
-  id            String      @id @default(uuid()) @db.Uuid
-  userId        String      @map("user_id") @db.Uuid
-  status        ShootStatus @default(PROCESSING)
-  type          ShootType
-  adaNo         String      @map("ada_no")
-  parselNo      String      @map("parsel_no")
-  il            String
-  ilce          String
-  latitude      Float?
-  longitude     Float?
-  voiceoverText String?     @map("voiceover_text")
-  audioUrl      String?     @map("audio_url")
-  videoUrl      String?     @map("video_url")
-  logoUrl       String?     @map("logo_url")
-  phoneNumber   String?     @map("phone_number")
-  brandColor    String?     @map("brand_color")
-  nearbyLabels  Json?       @map("nearby_labels")
-  landAnalysis  Json?       @map("land_analysis")
-  viewCount     Int         @default(0) @map("view_count")
-  publicToken   String?     @unique @default(uuid()) @map("public_token") @db.Uuid
-  createdAt     DateTime    @default(now()) @map("created_at")
-  completedAt   DateTime?   @map("completed_at")
-  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String           @id @default(uuid()) @db.Uuid
+  userId         String           @map("user_id") @db.Uuid
+  status         ShootStatus      @default(PROCESSING)
+  type           ShootType
+  adaNo          String           @map("ada_no")
+  parselNo       String           @map("parsel_no")
+  il             String
+  ilce           String
+  latitude       Float?
+  longitude      Float?
+  voiceoverText  String?          @map("voiceover_text")
+  audioUrl       String?          @map("audio_url")
+  videoUrl       String?          @map("video_url")
+  logoUrl        String?          @map("logo_url")
+  phoneNumber    String?          @map("phone_number")
+  brandColor     String?          @map("brand_color")
+  nearbyLabels   Json?            @map("nearby_labels")
+  landAnalysis   Json?            @map("land_analysis")
+  viewCount      Int              @default(0) @map("view_count")
+  publicToken    String?          @unique @default(uuid()) @map("public_token") @db.Uuid
+  createdAt      DateTime         @default(now()) @map("created_at")
+  completedAt    DateTime?        @map("completed_at")
+  parcelAnalyses ParcelAnalysis[]
+  user           User             @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId, createdAt])
   @@map("shoots")
+}
+
+model ParcelAnalysis {
+  id                   String   @id @default(uuid()) @db.Uuid
+  userId               String   @map("user_id") @db.Uuid
+  shootId              String?  @map("shoot_id") @db.Uuid
+  originalFileName     String   @map("original_file_name")
+  geojson              Json
+  kmlText              String?  @map("kml_text")
+  areaM2               Float    @map("area_m2")
+  perimeterM           Float    @map("perimeter_m")
+  centroidLat          Float    @map("centroid_lat")
+  centroidLng          Float    @map("centroid_lng")
+  bbox                 Json
+  cornerPoints         Json     @map("corner_points")
+  geometryType         String   @map("geometry_type")
+  approximateFrontageM Float    @map("approximate_frontage_m")
+  adaNo                String?  @map("ada_no")
+  parselNo             String?  @map("parsel_no")
+  il                   String?
+  ilce                 String?
+  marketingSummary     String?  @map("marketing_summary")
+  investmentScore      Int?     @map("investment_score")
+  investmentAnalysis   Json?    @map("investment_analysis")
+  socialCaptions       Json?    @map("social_captions")
+  visualPrompts        Json?    @map("visual_prompts")
+  reportHtml           String?  @map("report_html")
+  createdAt            DateTime @default(now()) @map("created_at")
+  updatedAt            DateTime @updatedAt @map("updated_at")
+  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  shoot                Shoot?   @relation(fields: [shootId], references: [id], onDelete: SetNull)
+
+  @@index([userId, createdAt])
+  @@index([shootId])
+  @@map("parcel_analyses")
 }
 
 model Payment {
